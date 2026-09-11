@@ -2,42 +2,50 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monopoly Card Draw</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
-    <!-- หน้าจอเลือกผู้เล่นก่อน (ป้องกันการกดมั่ว) -->
-    <div id="playerScreen">
-        <div class="title">👤 เลือกผู้เล่นที่กำลังจั่วการ์ด</div>
-        <button class="player-btn" onclick="selectPlayer('P01')">PLAYER 01</button>
-        <button class="player-btn" onclick="selectPlayer('P02')">PLAYER 02</button>
-        <button class="player-btn" onclick="selectPlayer('P03')">PLAYER 03</button>
-        <button class="player-btn" onclick="selectPlayer('P04')">PLAYER 04</button>
+    <div class="container">
+        <!-- หน้าเลือกผู้เล่น -->
+        <div id="playerScreen" class="screen">
+            <h2>🎲 เลือกผู้เล่นที่ต้องการจั่วการ์ด</h2>
+            <div class="player-grid">
+                <button class="player-btn" onclick="selectPlayer('P01')">PLAYER 01</button>
+                <button class="player-btn" onclick="selectPlayer('P02')">PLAYER 02</button>
+                <button class="player-btn" onclick="selectPlayer('P03')">PLAYER 03</button>
+                <button class="player-btn" onclick="selectPlayer('P04')">PLAYER 04</button>
+            </div>
+        </div>
+
+        <!-- หน้าเลือกกองการ์ด -->
+        <div id="selectScreen" class="screen" style="display: none;">
+            <h2 id="selectedPlayerTitle">🎲 ผู้เล่นที่จั่ว: -</h2>
+            <p>เลือกกองการ์ดที่ต้องการเปิด:</p>
+            <div class="deck-selection">
+                <button class="deck-btn" onclick="drawCard('chest')">💰 หีบสมบัติเจ้าสัว</button>
+                <button class="deck-btn" onclick="drawCard('chance')">⚡ ตั๋วเสี่ยงโชค</button>
+            </div>
+            <button class="back-btn" onclick="backToPlayerSelect()">⬅ เปลี่ยนผู้เล่น</button>
+        </div>
+
+        <!-- หน้าแสดงผลการจั่วการ์ด -->
+        <div id="resultScreen" class="screen" style="display: none;">
+            <div class="card-box">
+                <span id="cardBadge" class="card-badge">กองการ์ด</span>
+                <p id="cardText">กำลังโหลดการ์ด...</p>
+            </div>
+            <button class="back-btn" onclick="location.reload()">🔄 จั่วการ์ดอีกครั้ง</button>
+        </div>
     </div>
 
-    <!-- หน้าจอเลือกกองการ์ด (จะแสดงหลังจากเลือกผู้เล่นแล้ว) -->
-    <div id="selectScreen" style="display: none;">
-        <div class="title" id="selectedPlayerTitle">🎲 เลือกกองการ์ดที่คุณต้องการจั่ว</div>
-        <button class="deck-btn chest" onclick="drawCard('chest')">💰 หีบสมบัติเจ้าสัว</button>
-        <button class="deck-btn" onclick="drawCard('chance')">⚡ ตั๋วเสี่ยงโชค</button>
-        <button class="back-btn" onclick="backToPlayerSelect()">⬅️ เปลี่ยนผู้เล่น</button>
-    </div>
-
-    <!-- หน้าจอแสดงผลการ์ดที่สุ่มได้ -->
-    <div id="resultScreen" class="card-result-box" style="display: none;">
-        <div id="cardBadge" class="card-type-badge">กองการ์ด</div>
-        <div id="cardText" class="card-content">ข้อความการ์ด...</div>
-        <button class="action-button" onclick="closePage()">📥 รับทราบและปิดหน้าเว็บ</button>
-    </div>
-</div>
-
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-<script src="script.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <!-- Script ไฟล์หลัก -->
+    <script src="script.js"></script>
 </body>
 </html>

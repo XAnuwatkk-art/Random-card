@@ -1,5 +1,5 @@
 // ========================================
-// MONOPOLY CARD DRAW (Dynamic Player Names)
+// MONOPOLY CARD DRAW (Complete Script)
 // ========================================
 
 const firebaseConfig = {
@@ -7,7 +7,7 @@ const firebaseConfig = {
     authDomain: "monopoly-bank-67c20.firebaseapp.com",
     databaseURL: "https://monopoly-bank-67c20-default-rtdb.asia-southeast1.firebasedatabase.app",
     projectId: "monopoly-bank-67c20",
-    storageBucket: "monopoly-bank-67c20.firebasestorage.app",
+    storageBucket: "monopoly-bank-67c20.appspot.com",
     messagingSenderId: "73719951987",
     appId: "1:73719951987:web:348b715297478cb244b006",
     measurementId: "G-YPDREM2M9H"
@@ -28,7 +28,7 @@ const DEFAULT_PLAYERS = {
 let currentPlayer = "";
 let currentPlayersData = { ...DEFAULT_PLAYERS };
 
-// โหลดชื่อผู้เล่นจาก Firebase ทันทีที่เปิดหน้าเว็บ เพื่ออัปเดตชื่อบนปุ่มเลือก
+// โหลดชื่อผู้เล่นทันทีที่เปิดหน้าเว็บ
 window.addEventListener("DOMContentLoaded", () => {
     const bankRef = db.ref("bankData");
     bankRef.on("value", (snapshot) => {
@@ -36,11 +36,9 @@ window.addEventListener("DOMContentLoaded", () => {
         if (bankData) {
             ['P01', 'P02', 'P03', 'P04'].forEach(pKey => {
                 if (bankData[pKey]) {
-                    // ถ้าผู้เล่นมีการตั้งชื่อเล่น ให้ใช้ชื่อนั้น ถ้าไม่มีใช้ค่าเริ่มต้น
                     const customName = bankData[pKey].nickname || DEFAULT_PLAYERS[pKey];
                     currentPlayersData[pKey] = customName;
                     
-                    // ค้นหาปุ่มตาม onclick attribute แล้วเปลี่ยนข้อความหน้าเว็บ
                     const btn = document.querySelector(`button[onclick*="${pKey}"]`);
                     if (btn) {
                         btn.innerText = customName;
@@ -51,7 +49,6 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// ฟังก์ชันเลือกผู้เล่นก่อนสุ่ม
 function selectPlayer(playerKey) {
     currentPlayer = playerKey;
     document.getElementById("playerScreen").style.display = "none";
@@ -66,9 +63,8 @@ function backToPlayerSelect() {
     document.getElementById("playerScreen").style.display = "block";
 }
 
-// 💰 1. กองหีบสมบัติเจ้าสัว (35 ใบ: ได้เงิน 60% / เสียเงิน 40% | ฝั่งเสียเงินระหว่าง 2,000 - 10,000 บาท)
+// 💰 1. กองหีบสมบัติเจ้าสัว (รวมการ์ดปกติ + การ์ดพิเศษชุดที่ 1)
 const chestCards = [
-    // --- ฝั่งได้เงินก้อนโต (21 ใบ / 60%) ---
     { text: "💰 ถูกหวยรางวัลที่ 1! รับเงินโชคก้อนโต ฿20,000", amount: 20000, type: "add" },
     { text: "🏢 ขายตึกโรงแรมกลางเมืองได้กำไรมหาศาล รับเงิน ฿15,000", amount: 15000, type: "add" },
     { text: "🚀 หุ้นบริษัทพุ่งกระฉูด รับเงินปันผลพิเศษ ฿12,000", amount: 12000, type: "add" },
@@ -90,8 +86,6 @@ const chestCards = [
     { text: "🚁 ขายเฮลิคอปเตอร์ส่วนตัว รับเงินสด ฿14,000", amount: 14000, type: "add" },
     { text: "🏅 รับโบนัสพิเศษจากผลประกอบการทะลุเป้า รับเงิน ฿8,000", amount: 8000, type: "add" },
     { text: "🎯 ปิดดีลธุรกิจหมื่นล้าน รับเงินค่านายหน้า ฿18,000", amount: 18000, type: "add" },
-
-    // --- ฝั่งเสียเงิน (14 ใบ / 40% - หักระหว่าง 2,000 ถึง 10,000 บาทถ้วน) ---
     { text: "💸 โดนสรรพากรตรวจสอบภาษีย้อนหลัง จ่าย ฿5,000", amount: 5000, type: "subtract" },
     { text: "🔥 โรงงานผลิตสินค้าไฟไหม้เสียหาย จ่ายค่าซ่อม ฿8,000", amount: 8000, type: "subtract" },
     { text: "⚖️ แพ้คดีฟ้องร้องลิขสิทธิ์ธุรกิจ จ่ายค่าเสียหาย ฿10,000", amount: 10000, type: "subtract" },
@@ -105,10 +99,15 @@ const chestCards = [
     { text: "🔒 โดนแฮกเกอร์เรียกค่าไถ่ข้อมูล จ่าย ฿8,500", amount: 8500, type: "subtract" },
     { text: "⚖️ ถูกปรับข้อหาละเมิดสิ่งแวดล้อม จ่าย ฿4,500", amount: 4500, type: "subtract" },
     { text: "📉 จ่ายเงินพยุงกิจการช่วงวิกฤต ฿6,500", amount: 6500, type: "subtract" },
-    { text: "💥 จ่ายค่าปรับคดีความทางธุรกิจ ฿10,000", amount: 10000, type: "subtract" }
+    { text: "💥 จ่ายค่าปรับคดีความทางธุรกิจ ฿10,000", amount: 10000, type: "subtract" },
+    
+    // 🎴 การ์ดพิเศษกระจายในกองหีบสมบัติ
+    { text: "🤝 เซ็นสัญญาควบรวมกิจการ! สลับยอดเงินสดทั้งหมดของคุณกับผู้เล่นที่คุณเลือกทันที", type: "duel_swap" },
+    { text: "🦹‍♂️ สวมรอยเป็นโจรปล้นแบงก์! เลือกเพื่อน 1 คน เพื่อจวกเงินสด 15% จากกระเป๋ามาเข้ากระเป๋าคุณ", type: "duel_rob" },
+    { text: "📜 โฉนดมรณะ! เลือกรับที่ดิน (ไม่บวกเงิน) หรือเลือกรับเงินสด ฿5,000", amount: 5000, type: "duel_seizure" }
 ];
 
-// ⚡ 2. กองตั๋วเสี่ยงโชค (35 ใบ: มีการ์ดล้มละลาย 1 ใบถ้วน)
+// ⚡ 2. กองตั๋วเสี่ยงโชค (รวมการ์ดปกติ + การ์ดพิเศษชุดที่ 2)
 const chanceCards = [
     { text: "จ่ายค่าปรับขับรถเร็วเกินกำหนด ฿500", amount: 500, type: "subtract" },
     { text: "จ่ายค่าซ่อมแซมบ้านหลังละ ฿800", amount: 800, type: "subtract" },
@@ -140,11 +139,11 @@ const chanceCards = [
     { text: "แพ้คดีฟ้องร้อง จ่ายค่าเสียหาย ฿4,500", amount: 4500, type: "subtract" },
     { text: "จ่ายค่าบำรุงรักษาสะพานข้ามแม่น้ำ ฿800", amount: 800, type: "subtract" },
     { text: "ซื้อตั๋วเครื่องบินไฟต์บินยกเลิก เสียเงินเปล่า ฿1,300", amount: 1300, type: "subtract" },
-    { text: "จ่ายค่าปรับลักลอบตัดไม้ทำลายป่าในเกม ฿1,000", amount: 1000, type: "subtract" },
-    { text: "จ่ายค่าปรับนำเข้าสัตว์เลี้ยงผิดกฎหมาย ฿900", amount: 900, type: "subtract" },
-    { text: "จ่ายค่าซ่อมแซมท่อน้ำประปาแตก ฿1,100", amount: 1100, type: "subtract" },
-    { text: "จ่ายค่าธรรมเนียมโอนกรรมสิทธิ์ด่วนพิเศษ ฿1,500", amount: 1500, type: "subtract" },
-    // 💥 การ์ดล้มละลาย (มีใบนี้ใบเดียวในกองเสี่ยงโชค)
+    
+    // 🎴 การ์ดพิเศษกระจายในกองตั๋วเสี่ยงโชค
+    { text: "💸 สรรพากรตรวจสอบคนรวย! บังคับให้ผู้เล่นที่มีเงินสดในบัญชีมากที่สุดในห้อง เสียภาษี 7% ให้คุณ", type: "duel_rich_tax" },
+    { text: "⚖️ กองทุนรวมหุ้นส่วน! สุ่มเลือกเพื่อน 1 คน เอาเงินสดมารวมกันทั้งหมด แล้วหารสองแบ่งกัน", type: "duel_split" },
+    { text: "🍻 ฉลองใหญ่ใจป๋า! คุณอารมณ์ดี จ่ายเงินสดแจกให้ผู้เล่นคนอื่นๆ ทุกคนในห้องคนละ ฿1,000", type: "duel_party" },
     { text: "🔥 ล้มละลาย! โดนยึดทรัพย์สินทั้งหมด เงินในบัญชีเหลือ ฿0 ทันที!", amount: 0, type: "bankruptcy" }
 ];
 
@@ -167,23 +166,163 @@ function drawCard(deckType) {
         selectedCardObj = chanceCards[randomIndex];
     }
 
-    // อัปเดตหน้าจอแสดงผล
+    if (selectedCardObj.type === "duel_swap" || selectedCardObj.type === "duel_rob" || selectedCardObj.type === "duel_seizure") {
+        showDuelTargetSelector(selectedCardObj, badgeText);
+        return;
+    }
+
+    processCardResult(selectedCardObj, badgeText);
+}
+
+function showDuelTargetSelector(cardObj, badgeText) {
+    document.getElementById("selectScreen").style.display = "none";
+    document.getElementById("resultScreen").style.display = "block";
+
+    const pDisplayName = currentPlayersData[currentPlayer];
+    document.getElementById("cardBadge").innerText = `⚔️ ${badgeText} (${pDisplayName})`;
+    
+    let html = `<div style="margin-bottom:15px; font-weight:bold; color:#1b5e20;">${cardObj.text}</div>`;
+    
+    if (cardObj.type === "duel_seizure") {
+        html += `<div style="font-size:14px; margin-bottom:15px; color:#555;">เลือกสิ่งที่ต้องการรับ:</div>`;
+        html += `<button class="player-btn" style="background:#2e7d32; margin-bottom:8px; padding:10px;" onclick="resolveSeizureChoice('land', 0)">🏠 ได้รับที่ดิน (ไม่บวกยอดเงินเพิ่ม)</button>`;
+        html += `<button class="player-btn" style="background:#f57c00; padding:10px;" onclick="resolveSeizureChoice('cash', ${cardObj.amount})">💰 ได้รับเงินสด ฿5,000 (บวกยอดเงินเพิ่ม)</button>`;
+    } else {
+        html += `<div style="font-size:14px; margin-bottom:10px; color:#555;">เลือกผู้เล่นเป้าหมาย:</div>`;
+        ['P01', 'P02', 'P03', 'P04'].forEach(pKey => {
+            if (pKey !== currentPlayer) {
+                const targetName = currentPlayersData[pKey];
+                let actionFn = "";
+                if (cardObj.type === "duel_swap") actionFn = `executeSwap('${pKey}')`;
+                if (cardObj.type === "duel_rob") actionFn = `executeRob('${pKey}')`;
+
+                html += `<button class="player-btn" style="background:#d32f2f; margin-bottom:8px; padding:10px;" onclick="${actionFn}">เลือก: ${targetName}</button>`;
+            }
+        });
+    }
+
+    document.getElementById("cardText").innerHTML = html;
+}
+
+function resolveSeizureChoice(choiceType, amount) {
+    const bankRef = db.ref("bankData");
+    bankRef.once("value", function(snapshot) {
+        let bankData = snapshot.val();
+        if (!bankData) return;
+        if (!bankData[currentPlayer]) return;
+
+        let currentMoney = parseInt(bankData[currentPlayer].money) || 0;
+        const myName = currentPlayersData[currentPlayer];
+        let historyText = "";
+
+        if (choiceType === 'land') {
+            historyText = `${myName} จั่วโฉนดมรณะ: เลือกรับที่ดิน (ไม่บวกยอดเงินเพิ่ม)`;
+            document.getElementById("cardText").innerHTML = `🏠 สำเร็จ!<br>คุณเลือก <b>รับที่ดิน</b> เรียบร้อยแล้ว (ไม่มีการบวกเพิ่มยอดเงิน)`;
+        } else {
+            currentMoney += amount;
+            bankData[currentPlayer].money = currentMoney;
+            historyText = `${myName} จั่วโฉนดมรณะ: เลือกรับเงินสด +฿${amount.toLocaleString()}`;
+            document.getElementById("cardText").innerHTML = `💰 สำเร็จ!<br>คุณเลือกรับเงินสด <b>฿${amount.toLocaleString()}</b> เข้าบัญชีเรียบร้อยแล้ว!`;
+        }
+
+        if (currentMoney <= 0) {
+            bankData[currentPlayer].active = false;
+            bankData[currentPlayer].money = 0;
+        }
+
+        if (!Array.isArray(bankData.globalHistory)) bankData.globalHistory = [];
+        const timeString = new Date().toLocaleDateString("th-TH") + " " + new Date().toLocaleTimeString("th-TH", {hour: '2-digit', minute:'2-digit'});
+
+        bankData.globalHistory.push({
+            text: historyText,
+            amount: choiceType === 'cash' ? amount : 0,
+            time: timeString
+        });
+
+        bankRef.set(bankData);
+    });
+}
+
+function executeSwap(targetKey) {
+    const bankRef = db.ref("bankData");
+    bankRef.once("value", function(snapshot) {
+        let bankData = snapshot.val();
+        if (!bankData) return;
+
+        let myMoney = parseInt(bankData[currentPlayer].money) || 0;
+        let targetMoney = parseInt(bankData[targetKey].money) || 0;
+
+        bankData[currentPlayer].money = targetMoney;
+        bankData[targetKey].money = myMoney;
+
+        const myName = currentPlayersData[currentPlayer];
+        const targetName = currentPlayersData[targetKey];
+
+        if (!Array.isArray(bankData.globalHistory)) bankData.globalHistory = [];
+        const timeString = new Date().toLocaleDateString("th-TH") + " " + new Date().toLocaleTimeString("th-TH", {hour: '2-digit', minute:'2-digit'});
+
+        bankData.globalHistory.push({
+            text: `🤝 ${myName} สลับกระเป๋ากับ ${targetName} (สลับยอดเงิน ${myMoney.toLocaleString()} ⇄ ${targetMoney.toLocaleString()})`,
+            amount: 0,
+            time: timeString
+        });
+
+        bankRef.set(bankData);
+        document.getElementById("cardText").innerHTML = `🎉 สำเร็จ!<br>คุณสลับกระเป๋าเงินกับ <span style="color:#d32f2f;">${targetName}</span> เรียบร้อยแล้ว!`;
+    });
+}
+
+function executeRob(targetKey) {
+    const bankRef = db.ref("bankData");
+    bankRef.once("value", function(snapshot) {
+        let bankData = snapshot.val();
+        if (!bankData) return;
+
+        let myMoney = parseInt(bankData[currentPlayer].money) || 0;
+        let targetMoney = parseInt(bankData[targetKey].money) || 0;
+
+        let robAmount = Math.floor(targetMoney * 0.15);
+        if (robAmount < 0) robAmount = 0;
+
+        targetMoney -= robAmount;
+        myMoney += robAmount;
+
+        bankData[currentPlayer].money = myMoney;
+        bankData[targetKey].money = targetMoney;
+
+        const myName = currentPlayersData[currentPlayer];
+        const targetName = currentPlayersData[targetKey];
+
+        if (!Array.isArray(bankData.globalHistory)) bankData.globalHistory = [];
+        const timeString = new Date().toLocaleDateString("th-TH") + " " + new Date().toLocaleTimeString("th-TH", {hour: '2-digit', minute:'2-digit'});
+
+        bankData.globalHistory.push({
+            text: `🦹‍♂️ ${myName} ปล้นเงิน 15% จาก ${targetName}: +฿${robAmount.toLocaleString()}`,
+            amount: robAmount,
+            time: timeString
+        });
+
+        bankRef.set(bankData);
+        document.getElementById("cardText").innerHTML = `🎉 ปล้นสำเร็จ!<br>คุณฉกเงินจาก <span style="color:#d32f2f;">${targetName}</span> มาได้ <b>฿${robAmount.toLocaleString()}</b>`;
+    });
+}
+
+function processCardResult(card, badgeText) {
     document.getElementById("selectScreen").style.display = "none";
     document.getElementById("resultScreen").style.display = "block";
 
     const pDisplayName = currentPlayersData[currentPlayer];
     document.getElementById("cardBadge").innerText = badgeText + ` (${pDisplayName})`;
     const textElement = document.getElementById("cardText");
-    textElement.innerText = selectedCardObj.text;
+    textElement.innerText = card.text;
 
-    if (selectedCardObj.type === "bankruptcy") {
+    if (card.type === "bankruptcy") {
         textElement.classList.add("bankruptcy");
     } else {
         textElement.classList.remove("bankruptcy");
     }
 
-    // อัปเดตเงินผู้เล่นใน Firebase ทันที
-    updatePlayerMoneyInFirebase(selectedCardObj);
+    updatePlayerMoneyInFirebase(card);
 }
 
 function updatePlayerMoneyInFirebase(card) {
@@ -192,13 +331,11 @@ function updatePlayerMoneyInFirebase(card) {
     bankRef.once("value", function(snapshot) {
         let bankData = snapshot.val();
         if (!bankData) return;
-
         if (!bankData[currentPlayer]) return;
 
         let currentMoney = parseInt(bankData[currentPlayer].money) || 0;
         let changeAmount = 0;
         let historyText = "";
-
         const pName = currentPlayersData[currentPlayer];
 
         if (card.type === "add") {
@@ -213,18 +350,62 @@ function updatePlayerMoneyInFirebase(card) {
             changeAmount = -currentMoney;
             currentMoney = 0;
             historyText = `${pName} (การ์ด): ล้มละลาย!`;
+        } 
+        else if (card.type === "duel_rich_tax") {
+            let richestKey = null;
+            let maxMoney = -1;
+
+            ['P01', 'P02', 'P03', 'P04'].forEach(pKey => {
+                if (bankData[pKey] && bankData[pKey].active !== false) {
+                    let m = parseInt(bankData[pKey].money) || 0;
+                    if (m > maxMoney) {
+                        maxMoney = m;
+                        richestKey = pKey;
+                    }
+                }
+            });
+
+            if (richestKey && richestKey !== currentPlayer) {
+                let taxAmount = Math.floor(maxMoney * 0.07);
+                bankData[richestKey].money -= taxAmount;
+                currentMoney += taxAmount;
+                historyText = `${pName} เก็บภาษี 7% จาก ${currentPlayersData[richestKey]}: +฿${taxAmount.toLocaleString()}`;
+            } else {
+                historyText = `${pName} จั่วการ์ดภาษีคนรวย (ไม่มีใครให้เก็บภาษีเพิ่มเติม)`;
+            }
+        }
+        else if (card.type === "duel_split") {
+            let otherKeys = ['P01', 'P02', 'P03', 'P04'].filter(k => k !== currentPlayer);
+            let randomPartnerKey = otherKeys[Math.floor(Math.random() * otherKeys.length)];
+            
+            let partnerMoney = parseInt(bankData[randomPartnerKey].money) || 0;
+            let totalPool = currentMoney + partnerMoney;
+            let splitAmount = Math.floor(totalPool / 2);
+
+            currentMoney = splitAmount;
+            bankData[randomPartnerKey].money = splitAmount;
+
+            historyText = `${pName} รวมกระเป๋ากับ ${currentPlayersData[randomPartnerKey]} แล้วหารครึ่ง คนละ ฿${splitAmount.toLocaleString()}`;
+        }
+        else if (card.type === "duel_party") {
+            let totalGiven = 0;
+            ['P01', 'P02', 'P03', 'P04'].forEach(pKey => {
+                if (pKey !== currentPlayer && bankData[pKey]) {
+                    bankData[pKey].money = (parseInt(bankData[pKey].money) || 0) + 1000;
+                    totalGiven += 1000;
+                }
+            });
+            currentMoney -= totalGiven;
+            historyText = `${pName} เลี้ยงโต๊ะจีนฉลองชัย แจกเงินให้ทุกคนคนละ ฿1,000`;
         }
 
-        // อัปเดตเงินผู้เล่น
         bankData[currentPlayer].money = currentMoney;
 
-        // เช็คเงื่อนไขล้มละลาย (<= 0)
         if (currentMoney <= 0) {
             bankData[currentPlayer].active = false;
             bankData[currentPlayer].money = 0;
         }
 
-        // บันทึกลงประวัติส่วนกลาง (Global History)
         if (!Array.isArray(bankData.globalHistory)) {
             bankData.globalHistory = [];
         }
@@ -234,7 +415,7 @@ function updatePlayerMoneyInFirebase(card) {
 
         bankData.globalHistory.push({
             text: historyText,
-            amount: card.type === "add" ? card.amount : (card.type === "subtract" ? -card.amount : 0),
+            amount: card.amount || 0,
             time: timeString
         });
 
