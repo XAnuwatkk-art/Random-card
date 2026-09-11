@@ -40,6 +40,21 @@ body {
     margin-bottom: 16px;
 }
 
+.player-btn {
+    background: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    width: 100%;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 10px rgba(25,118,210,0.3);
+    touch-action: manipulation;
+}
+
 .deck-btn {
     background: #f57c00;
     color: white;
@@ -60,7 +75,20 @@ body {
     box-shadow: 0 4px 10px rgba(46,125,50,0.3);
 }
 
-.deck-btn:active, .action-button:active {
+.back-btn {
+    background: #757575;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px;
+    width: 100%;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+.player-btn:active, .deck-btn:active, .back-btn:active, .action-button:active {
     transform: scale(0.98);
 }
 

@@ -9,11 +9,21 @@
 <body>
 
 <div class="container">
-    <!-- หน้าจอเลือกกองการ์ด -->
-    <div id="selectScreen">
-        <div class="title">🎲 เลือกกองการ์ดที่คุณต้องการจั่ว</div>
+    <!-- หน้าจอเลือกผู้เล่นก่อน (ป้องกันการกดมั่ว) -->
+    <div id="playerScreen">
+        <div class="title">👤 เลือกผู้เล่นที่กำลังจั่วการ์ด</div>
+        <button class="player-btn" onclick="selectPlayer('P01')">PLAYER 01</button>
+        <button class="player-btn" onclick="selectPlayer('P02')">PLAYER 02</button>
+        <button class="player-btn" onclick="selectPlayer('P03')">PLAYER 03</button>
+        <button class="player-btn" onclick="selectPlayer('P04')">PLAYER 04</button>
+    </div>
+
+    <!-- หน้าจอเลือกกองการ์ด (จะแสดงหลังจากเลือกผู้เล่นแล้ว) -->
+    <div id="selectScreen" style="display: none;">
+        <div class="title" id="selectedPlayerTitle">🎲 เลือกกองการ์ดที่คุณต้องการจั่ว</div>
         <button class="deck-btn chest" onclick="drawCard('chest')">💰 หีบสมบัติเจ้าสัว</button>
         <button class="deck-btn" onclick="drawCard('chance')">⚡ ตั๋วเสี่ยงโชค</button>
+        <button class="back-btn" onclick="backToPlayerSelect()">⬅️ เปลี่ยนผู้เล่น</button>
     </div>
 
     <!-- หน้าจอแสดงผลการ์ดที่สุ่มได้ -->
