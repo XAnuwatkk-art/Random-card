@@ -1,56 +1,204 @@
-// ฐานข้อมูลการ์ดทั้ง 2 กอง
+// ========================================
+// MONOPOLY CARD DRAW (Full Integration)
+// ========================================
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDZbVA5OPmLg7UpmrndqNJ7V7WIS7nmGyA",
+    authDomain: "monopoly-bank-67c20.firebaseapp.com",
+    databaseURL: "https://monopoly-bank-67c20-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "monopoly-bank-67c20",
+    storageBucket: "monopoly-bank-67c20.firebasestorage.app",
+    messagingSenderId: "73719951987",
+    appId: "1:73719951987:web:348b715297478cb244b006",
+    measurementId: "G-YPDREM2M9H"
+};
+
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.database();
+
+const PLAYERS = {
+    P01: "PLAYER 01",
+    P02: "PLAYER 02",
+    P03: "PLAYER 03",
+    P04: "PLAYER 04"
+};
+
+// ดึง player จาก URL (เช่น ?player=P01)
+const urlParams = new URLSearchParams(window.location.search);
+let currentPlayer = urlParams.get("player") ? urlParams.get("player").toUpperCase() : "P01";
+if (!PLAYERS[currentPlayer]) currentPlayer = "P01";
+
+// 💰 1. กองหีบสมบัติเจ้าสัว (35 ใบ: ได้เงิน 60% / เสียเงิน 40% เน้นยอดเงินก้อนโต)
 const chestCards = [
-    "ธนาคารผิดพลาดจ่ายเงินให้คุณ ฿2,000",
-    "ขายหุ้นได้กำไร รับเงิน ฿1,000",
-    "ได้รับรางวัลประกวดความงาม รับเงิน ฿500",
-    "ได้รับเงินปันผลประจำปี ฿1,500",
-    "กองมรดกตกทอด รับเงิน ฿3,000",
-    "คืนภาษีเงินได้ รับเงิน ฿800",
-    "ชนะการแข่งขันเศรษฐีประจำปี รับเงิน ฿2,500"
+    // --- ฝั่งได้เงินก้อนโต (21 ใบ) ---
+    { text: "💰 ถูกหวยรางวัลที่ 1! รับเงินโชคก้อนโต ฿20,000", amount: 20000, type: "add" },
+    { text: "🏢 ขายตึกโรงแรมกลางเมืองได้กำไรมหาศาล รับเงิน ฿15,000", amount: 15000, type: "add" },
+    { text: "🚀 หุ้นบริษัทพุ่งกระฉูด รับเงินปันผลพิเศษ ฿12,000", amount: 12000, type: "add" },
+    { text: "💎 ขุดพบเพชรพลอยในที่ดินส่วนตัว ขายได้เงิน ฿18,000", amount: 18000, type: "add" },
+    { text: "👑 รับมรดกตกทอดจากเศรษฐีร้อยล้าน รับเงิน ฿25,000", amount: 25000, type: "add" },
+    { text: "🏆 ชนะการประมูลโปรเจกต์ใหญ่แห่งปี รับเงิน ฿14,000", amount: 14000, type: "add" },
+    { text: "🚢 เปิดเส้นทางเดินเรือสำราญกำไรพุ่ง รับเงิน ฿10,000", amount: 10000, type: "add" },
+    { text: "⭐ ได้รับเงินสนับสนุนจากนักลงทุนต่างชาติ รับเงิน ฿16,000", amount: 16000, type: "add" },
+    { text: "🏦 ธนาคารกลางคืนเงินปันผลสะสม รับเงิน ฿8,000", amount: 8000, type: "add" },
+    { text: "🎉 ชนะการแข่งขันเศรษฐีโลก รับเงินรางวัล ฿15,000", amount: 15000, type: "add" },
+    { text: "🌾 ขายที่ดินทำโครงการหมู่บ้านจัดสรร รับเงิน ฿22,000", amount: 22000, type: "add" },
+    { text: "⚡ ขายลิขสิทธิ์เทคโนโลยีพลังงานสะอาด รับเงิน ฿11,000", amount: 11000, type: "add" },
+    { text: "🎁 ได้รับเงินขวัญถุงจากกลุ่มทุนใหญ่ รับเงิน ฿9,000", amount: 9000, type: "add" },
+    { text: "📈 เก็งกำไรค่าเงินสำเร็จ รับเงินก้อนโต ฿13,000", amount: 13000, type: "add" },
+    { text: "🌟 กองทุนสำรองเลี้ยงชีพให้ผลตอบแทนสูง รับเงิน ฿7,000", amount: 7000, type: "add" },
+    { text: "🎨 ประมูลขายภาพวาดศิลปะโบราณได้ราคาสูง รับเงิน ฿10,000", amount: 10000, type: "add" },
+    { text: "🏆 ได้รับรางวัลผู้บริหารยอดเยี่ยมประจำปี รับเงิน ฿12,000", amount: 12000, type: "add" },
+    { text: "💼 ขายกิจการสตาร์ทอัพให้บริษัทใหญ่ รับเงิน ฿20,000", amount: 20000, type: "add" },
+    { text: "🚁 ขายเฮลิคอปเตอร์ส่วนตัว รับเงินสด ฿14,000", amount: 14000, type: "add" },
+    { text: "🏅 รับโบนัสพิเศษจากผลประกอบการทะลุเป้า รับเงิน ฿8,000", amount: 8000, type: "add" },
+    { text: "🎯 ปิดดีลธุรกิจหมื่นล้าน รับเงินค่านายหน้า ฿18,000", amount: 18000, type: "add" },
+
+    // --- ฝั่งเสียเงินก้อนใหญ่ (14 ใบ) ---
+    { text: "💸 โดนสรรพากรตรวจสอบภาษีย้อนหลังครั้งใหญ่ จ่าย ฿15,000", amount: 15000, type: "subtract" },
+    { text: "🔥 โรงงานผลิตสินค้าไฟไหม้เสียหายหนัก จ่ายค่าซ่อม ฿18,000", amount: 18000, type: "subtract" },
+    { text: "⚖️ แพ้คดีฟ้องร้องลิขสิทธิ์ธุรกิจ จ่ายค่าเสียหาย ฿20,000", amount: 20000, type: "subtract" },
+    { text: "📉 ลงทุนหุ้นผิดพลาดเจ๊งยับเยิน เสียเงิน ฿12,000", amount: 12000, type: "subtract" },
+    { text: "🏗️ โครงการก่อสร้างตึกสะดุด งบบานปลาย จ่ายเพิ่ม ฿14,000", amount: 14000, type: "subtract" },
+    { text: "🛥️ เรือยอชท์ส่วนตัวชนแนวปะการัง จ่ายค่ากู้ซาก ฿10,000", amount: 10000, type: "subtract" },
+    { text: "🌪️ พายุถล่มคลังสินค้าสินค้าเสียหายหมด จ่าย ฿16,000", amount: 16000, type: "subtract" },
+    { text: "🚨 โดนปรับข้อหาฮั้วประมูลโครงการรัฐ จ่าย ฿15,000", amount: 15000, type: "subtract" },
+    { text: "💼 ทุจริตในองค์กร โดนปรับค่าเสียหายชดเชย จ่าย ฿12,000", amount: 12000, type: "subtract" },
+    { text: "💊 วิกฤตสุขภาพ ค่ารักษาพยาบาลโรงพยาบาลเอกชน จ่าย ฿10,000", amount: 10000, type: "subtract" },
+    { text: "🔒 โดนแฮกเกอร์เรียกค่าไถ่ข้อมูลบริษัท จ่าย ฿18,000", amount: 18000, type: "subtract" },
+    { text: "⚖️ ถูกปรับข้อหาละเมิดกฎหมายสิ่งแวดล้อมโรงงาน จ่าย ฿11,000", amount: 11000, type: "subtract" },
+    { text: "📉 เครือข่ายธุรกิจล่มสลาย จ่ายเงินพยุงกิจการ ฿13,000", amount: 13000, type: "subtract" },
+    { text: "💥 จ่ายค่าปรับคดีความทางธุรกิจครั้งประวัติศาสตร์ ฿22,000", amount: 22000, type: "subtract" }
 ];
 
+// ⚡ 2. กองตั๋วเสี่ยงโชค (35 ใบ: มีการ์ดล้มละลาย 1 ใบถ้วน)
 const chanceCards = [
-    "จ่ายค่าปรับความเร็วเกินกำหนด ฿500",
-    "จ่ายค่าซ่อมแซมบ้านหลังละ ฿800",
-    "จ่ายค่าแพทย์ ฿1,000",
-    "โดนปรับข้อหาจอดรถผิดกฎหมาย ฿300",
-    "ภาษีโรงเรือนและที่ดิน จ่าย ฿1,200",
-    // 💥 การ์ดล้มละลายผสมอยู่
-    "🔥 ล้มละลาย! โดนยึดทรัพย์สินทั้งหมด เงินในบัญชีเหลือ ฿0 ทันที!",
-    "💥 วิกฤตการเงิน! เงินหมดเกลี้ยงบัญชี (ล้มละลาย)"
+    { text: "จ่ายค่าปรับขับรถเร็วเกินกำหนด ฿500", amount: 500, type: "subtract" },
+    { text: "จ่ายค่าซ่อมแซมบ้านหลังละ ฿800", amount: 800, type: "subtract" },
+    { text: "จ่ายค่ารักษาพยาบาลฉุกเฉิน ฿1,000", amount: 1000, type: "subtract" },
+    { text: "โดนปรับข้อหาจอดรถผิดกฎหมาย ฿300", amount: 300, type: "subtract" },
+    { text: "จ่ายภาษีโรงเรือนและที่ดินประจำปี ฿1,200", amount: 1200, type: "subtract" },
+    { text: "จ่ายค่าบำรุงถนนส่วนกลาง ฿600", amount: 600, type: "subtract" },
+    { text: "ทำโทรศัพท์มือถือราคาแพงตกแตก จ่ายค่าซ่อม ฿2,000", amount: 2000, type: "subtract" },
+    { text: "จ่ายค่าประกันสุขภาพรายปี ฿1,500", amount: 1500, type: "subtract" },
+    { text: "ขับรถชนท้ายคันอื่น จ่ายค่าเสียหาย ฿2,500", amount: 2500, type: "subtract" },
+    { text: "จ่ายค่าปรับทิ้งขยะในที่สาธารณะ ฿400", amount: 400, type: "subtract" },
+    { text: "บ้านโดนพายุพัดหลังคาเสียหาย จ่ายค่าซ่อม ฿3,000", amount: 3000, type: "subtract" },
+    { text: "สัตว์เลี้ยงป่วยหนัก จ่ายค่ารักษาพยาบาลสัตว์ ฿1,800", amount: 1800, type: "subtract" },
+    { text: "ลืมจ่ายค่าไฟค้างนาน โดนค่าปรับทบต้น ฿700", amount: 700, type: "subtract" },
+    { text: "ซื้อสินค้าออนไลน์แล้วโดนหลอก เสียเงิน ฿1,200", amount: 1200, type: "subtract" },
+    { text: "จ่ายค่าสมาชิกฟิตเนสรายปีที่ไม่ได้ใช้ ฿2,200", amount: 2200, type: "subtract" },
+    { text: "โดนใบสั่งข้อหาฝ่าไฟแดง ฿1,000", amount: 1000, type: "subtract" },
+    { text: "จ่ายค่าปรับภาษีนำเข้าสินค้าต่างประเทศ ฿1,400", amount: 1400, type: "subtract" },
+    { text: "ทำกระเป๋าเงินหายระหว่างเดินทาง เสียเงิน ฿1,500", amount: 1500, type: "subtract" },
+    { text: "จ่ายค่าทนายความสู้คดีหมิ่นประมาท ฿3,500", amount: 3500, type: "subtract" },
+    { text: "ทำคอมพิวเตอร์พังกลางคัน จ่ายค่าซื้อเครื่องใหม่ ฿4,000", amount: 4000, type: "subtract" },
+    { text: "จ่ายค่าปรับสร้างตึกเกินโฉนด ฿2,800", amount: 2800, type: "subtract" },
+    { text: "โดนขโมยจักรยานยนต์หน้าบ้าน เสียหาย ฿3,000", amount: 3000, type: "subtract" },
+    { text: "จ่ายค่าปรับทิ้งคราบน้ำมันลงแม่น้ำ ฿1,600", amount: 1600, type: "subtract" },
+    { text: "จ้างคนมาทำความสะอาดบ้านครั้งใหญ่ จ่าย ฿900", amount: 900, type: "subtract" },
+    { text: "จ่ายค่าบำรุงสนามกอล์ฟส่วนตัว ฿1,100", amount: 1100, type: "subtract" },
+    { text: "ทำนาฬิกาหรูตกน้ำ เสียค่าซ่อม ฿2,500", amount: 2500, type: "subtract" },
+    { text: "จ่ายค่าปรับผิดสัญญาทางธุรกิจ ฿3,200", amount: 3200, type: "subtract" },
+    { text: "แพ้คดีฟ้องร้อง จ่ายค่าเสียหาย ฿4,500", amount: 4500, type: "subtract" },
+    { text: "จ่ายค่าบำรุงรักษาสะพานข้ามแม่น้ำ ฿800", amount: 800, type: "subtract" },
+    { text: "ซื้อตั๋วเครื่องบินไฟต์บินยกเลิก เสียเงินเปล่า ฿1,300", amount: 1300, type: "subtract" },
+    { text: "จ่ายค่าปรับลักลอบตัดไม้ทำลายป่าในเกม ฿1,000", amount: 1000, type: "subtract" },
+    // 32-34 เพิ่มเติมเพื่อให้ครบ 35 ใบ
+    { text: "จ่ายค่าปรับนำเข้าสัตว์เลี้ยงผิดกฎหมาย ฿900", amount: 900, type: "subtract" },
+    { text: "จ่ายค่าซ่อมแซมท่อน้ำประปาแตก ฿1,100", amount: 1100, type: "subtract" },
+    { text: "จ่ายค่าธรรมเนียมโอนกรรมสิทธิ์ด่วนพิเศษ ฿1,500", amount: 1500, type: "subtract" },
+    // 💥 การ์ดล้มละลาย (มีใบนี้ใบเดียวในกองเสี่ยงโชค)
+    { text: "🔥 ล้มละลาย! โดนยึดทรัพย์สินทั้งหมด เงินในบัญชีเหลือ ฿0 ทันที!", amount: 0, type: "bankruptcy" }
 ];
 
-function drawCard(type) {
-    let selectedCard = "";
+function drawCard(deckType) {
+    let selectedCardObj;
     let badgeText = "";
-    let isBankruptcy = false;
 
-    if (type === 'chest') {
+    if (deckType === 'chest') {
         badgeText = "💰 หีบสมบัติเจ้าสัว";
         const randomIndex = Math.floor(Math.random() * chestCards.length);
-        selectedCard = chestCards[randomIndex];
+        selectedCardObj = chestCards[randomIndex];
     } else {
         badgeText = "⚡ ตั๋วเสี่ยงโชค";
         const randomIndex = Math.floor(Math.random() * chanceCards.length);
-        selectedCard = chanceCards[randomIndex];
-        if (selectedCard.includes("ล้มละลาย")) {
-            isBankruptcy = true;
-        }
+        selectedCardObj = chanceCards[randomIndex];
     }
 
-    // สลับหน้าจอจากเลือกกองการ์ด เป็นแสดงผลการ์ด
+    // อัปเดตหน้าจอแสดงผล
     document.getElementById("selectScreen").style.display = "none";
     document.getElementById("resultScreen").style.display = "block";
 
-    document.getElementById("cardBadge").innerText = badgeText;
+    document.getElementById("cardBadge").innerText = badgeText + ` (${PLAYERS[currentPlayer]})`;
     const textElement = document.getElementById("cardText");
-    textElement.innerText = selectedCard;
+    textElement.innerText = selectedCardObj.text;
 
-    if (isBankruptcy) {
+    if (selectedCardObj.type === "bankruptcy") {
         textElement.classList.add("bankruptcy");
     } else {
         textElement.classList.remove("bankruptcy");
     }
+
+    // ทำการเชื่อม Firebase เพื่อปรับเงินจริงของผู้เล่นทันที
+    updatePlayerMoneyInFirebase(selectedCardObj);
+}
+
+function updatePlayerMoneyInFirebase(card) {
+    const bankRef = db.ref("bankData");
+
+    bankRef.once("value", function(snapshot) {
+        let bankData = snapshot.val();
+        if (!bankData) return;
+
+        if (!bankData[currentPlayer]) return;
+
+        let currentMoney = parseInt(bankData[currentPlayer].money) || 0;
+        let changeAmount = 0;
+        let historyText = "";
+
+        const pName = bankData[currentPlayer].nickname ? bankData[currentPlayer].nickname : PLAYERS[currentPlayer];
+
+        if (card.type === "add") {
+            changeAmount = card.amount;
+            currentMoney += changeAmount;
+            historyText = `${pName} (การ์ด): +฿${changeAmount.toLocaleString()}`;
+        } else if (card.type === "subtract") {
+            changeAmount = -card.amount;
+            currentMoney += changeAmount;
+            historyText = `${pName} (การ์ด): -฿{card.amount.toLocaleString()}`;
+        } else if (card.type === "bankruptcy") {
+            changeAmount = -currentMoney;
+            currentMoney = 0;
+            historyText = `${pName} (การ์ด): ล้มละลาย!`;
+        }
+
+        // อัปเดตเงินผู้เล่น
+        bankData[currentPlayer].money = currentMoney;
+
+        // เช็คเงื่อนไขล้มละลาย (<= 0)
+        if (currentMoney <= 0) {
+            bankData[currentPlayer].active = false;
+            bankData[currentPlayer].money = 0;
+        }
+
+        // บันทึกลงประวัติส่วนกลาง (Global History)
+        if (!Array.isArray(bankData.globalHistory)) {
+            bankData.globalHistory = [];
+        }
+
+        const now = new Date();
+        const timeString = now.toLocaleDateString("th-TH") + " " + now.toLocaleTimeString("th-TH", {hour: '2-digit', minute:'2-digit'});
+
+        bankData.globalHistory.push({
+            text: historyText,
+            amount: card.type === "add" ? card.amount : (card.type === "subtract" ? -card.amount : 0),
+            time: timeString
+        });
+
+        bankRef.set(bankData);
+    });
 }
 
 function closePage() {

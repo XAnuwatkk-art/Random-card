@@ -13,7 +13,7 @@
     <div id="selectScreen">
         <div class="title">🎲 เลือกกองการ์ดที่คุณต้องการจั่ว</div>
         <button class="deck-btn chest" onclick="drawCard('chest')">💰 หีบสมบัติเจ้าสัว</button>
-        <button class="deck-btn" onclick="drawCard('chance')">⚡ ตั๋วเสี่ยงโชค (ระวังล้มละลาย!)</button>
+        <button class="deck-btn" onclick="drawCard('chance')">⚡ ตั๋วเสี่ยงโชค</button>
     </div>
 
     <!-- หน้าจอแสดงผลการ์ดที่สุ่มได้ -->
@@ -23,6 +23,10 @@
         <button class="action-button" onclick="closePage()">📥 รับทราบและปิดหน้าเว็บ</button>
     </div>
 </div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script src="script.js"></script>
 </body>
