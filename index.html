@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Monopoly Card Draw</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <!-- หน้าจอเลือกกองการ์ด -->
+    <div id="selectScreen">
+        <div class="title">🎲 เลือกกองการ์ดที่คุณต้องการจั่ว</div>
+        <button class="deck-btn chest" onclick="drawCard('chest')">💰 หีบสมบัติเจ้าสัว</button>
+        <button class="deck-btn" onclick="drawCard('chance')">⚡ ตั๋วเสี่ยงโชค (ระวังล้มละลาย!)</button>
+    </div>
+
+    <!-- หน้าจอแสดงผลการ์ดที่สุ่มได้ -->
+    <div id="resultScreen" class="card-result-box" style="display: none;">
+        <div id="cardBadge" class="card-type-badge">กองการ์ด</div>
+        <div id="cardText" class="card-content">ข้อความการ์ด...</div>
+        <button class="action-button" onclick="closePage()">📥 รับทราบและปิดหน้าเว็บ</button>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
